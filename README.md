@@ -1,2 +1,2 @@
 # job-tracker
-A full-stack, microservices-based job application tracking system.
+A full-stack, mono repo microservices-based job application tracking system.
