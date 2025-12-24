@@ -2,7 +2,9 @@ package com.jobtracker.auth.service;
 
 import com.jobtracker.auth.dto.LoginRequest;
 import com.jobtracker.auth.dto.LoginResponse;
+import com.jobtracker.auth.dto.ProfileResponse;
 import com.jobtracker.auth.dto.RegisterRequest;
+import com.jobtracker.auth.dto.UpdateProfileRequest;
 import com.jobtracker.auth.entity.UserEntity;
 import com.jobtracker.auth.entity.UserProfileEntity;
 import com.jobtracker.auth.exception.DuplicateEmailException;
@@ -13,8 +15,6 @@ import com.jobtracker.auth.security.JwtUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,6 +83,30 @@ public class AuthService {
         log.info("Login successful for userId: {}", user.getId());
 
         return new LoginResponse(token, 3600);
+    }
+
+    public ProfileResponse getProfile(Long userId) {
+        UserProfileEntity profile = userProfileRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Profile not found"));
+
+        return new ProfileResponse(
+            profile.getName(),
+            profile.getPhone(),
+            profile.getResumeUrl()
+        );
+    }
+
+    @Transactional
+    public void updateProfile(Long userId, UpdateProfileRequest request) {
+
+        UserProfileEntity profile = userProfileRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+
+        profile.setName(request.getName());
+        profile.setPhone(request.getPhone());
+        profile.setResumeUrl(request.getResumeUrl());
+
+        userProfileRepository.save(profile);
     }
 
 }
