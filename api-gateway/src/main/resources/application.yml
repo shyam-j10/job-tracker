@@ -14,13 +14,13 @@ spring:
 
       routes:
         - id: auth-service
-          uri: lb://auth-service
+          uri: lb://AUTH-SERVICE
           predicates:
-            - Path=/api/auth/**
-        - id: auth-service-profile
-          uri: lb://auth-service
+            - Path=/api/auth/**,/api/profile/**
+        - id: job-service
+          uri: lb://JOB-SERVICE
           predicates:
-            - Path=/api/profile/**
+            - Path=/api/jobs/**
 
 eureka:
   client:
