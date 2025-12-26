@@ -23,3 +23,14 @@ spring:
           com.jobtracker.job.kafka.event
         spring.json.value.default.type: com.jobtracker.notification.kafka.event.JobEvent
         spring.json.use.type.headers: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jayashyam2023@gmail.com
+    password: ftoirhrixcolucvy
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
