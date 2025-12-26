@@ -47,7 +47,6 @@ public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     }
 
     String token = authHeader.substring(7);
-    log.info("JWT token extracted", token);
 
     try {
         Claims claims = jwtUtil.validateToken(token);
@@ -56,6 +55,7 @@ public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerWebExchange mutatedExchange = exchange.mutate()
                 .request(builder -> builder
                         .header("X-User-Id", claims.get("userId").toString())
+                        .header("X-User-Email", claims.get("email").toString())
                 )
                 .build();
 
