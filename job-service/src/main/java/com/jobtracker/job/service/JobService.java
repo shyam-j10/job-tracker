@@ -6,8 +6,14 @@ import com.jobtracker.job.dto.response.ContactResponse;
 import com.jobtracker.job.dto.response.JobResponse;
 import com.jobtracker.job.entity.Contact;
 import com.jobtracker.job.entity.JobEntry;
+import com.jobtracker.job.enums.ApplicationStatus;
 import com.jobtracker.job.exception.ResourceNotFoundException;
+import com.jobtracker.job.kafka.JobEventProducer;
+import com.jobtracker.job.kafka.event.JobEvent;
 import com.jobtracker.job.repository.JobEntryRepository;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +25,14 @@ import java.util.stream.Collectors;
 public class JobService {
 
     private final JobEntryRepository jobEntryRepository;
+    private final JobEventProducer jobEventProducer;
+    private static final Logger log = LoggerFactory.getLogger(JobService.class);
 
-    public JobService(JobEntryRepository jobEntryRepository) {
+
+    public JobService(JobEntryRepository jobEntryRepository,
+                    JobEventProducer jobEventProducer) {
         this.jobEntryRepository = jobEntryRepository;
+        this.jobEventProducer = jobEventProducer;
     }
 
     private JobResponse mapToResponse(JobEntry job) {
@@ -81,6 +92,17 @@ public class JobService {
         }
 
         JobEntry saved = jobEntryRepository.save(job);
+
+        jobEventProducer.send(
+            new JobEvent(
+                saved.getId(),
+                userId,
+                "JOB_CREATED",
+                "Job created for " + saved.getCompanyName()
+            )
+        );
+
+
         return mapToResponse(saved);
     }
 
@@ -102,9 +124,13 @@ public class JobService {
     public JobResponse updateJob(Long jobId, UpdateJobRequest request, Long userId) {
 
         JobEntry job = jobEntryRepository
-                .findByIdAndUserId(jobId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
-
+        .findByIdAndUserId(jobId, userId)
+        .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+        
+        log.info("Update job processing");
+    
+        ApplicationStatus oldStatus = job.getApplicationStatus();
+        
         if (request.getCompanyName() != null) {
             job.setCompanyName(request.getCompanyName());
         }
@@ -122,6 +148,18 @@ public class JobService {
         }
         if (request.getNotes() != null) {
             job.setNotes(request.getNotes());
+        }
+
+        if (request.getApplicationStatus() != null &&
+            !request.getApplicationStatus().equals(oldStatus)) {
+            jobEventProducer.send(
+                new JobEvent(
+                    job.getId(),
+                    userId,
+                    "JOB_STATUS_UPDATED",
+                    "Status changed to " + request.getApplicationStatus()
+                )
+        );
         }
 
         // Replace contacts safely
@@ -149,6 +187,16 @@ public class JobService {
         JobEntry job = jobEntryRepository
                 .findByIdAndUserId(jobId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+
+        jobEventProducer.send(
+            new JobEvent(
+                job.getId(),
+                userId,
+                "JOB_DELETED",
+                "Job deleted"
+            )
+        );
+
 
         jobEntryRepository.delete(job);
     }
