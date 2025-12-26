@@ -27,9 +27,10 @@ public class JobController {
     @PostMapping
     public ResponseEntity<JobResponse> createJob(
             @Valid @RequestBody CreateJobRequest request,
-            @RequestHeader("X-User-Id") Long userId
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader("X-User-Email") String email
     ) {
-        JobResponse response = jobService.createJob(request, userId);
+        JobResponse response = jobService.createJob(request, userId,email);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -55,18 +56,20 @@ public class JobController {
     public ResponseEntity<JobResponse> updateJob(
             @PathVariable Long id,
             @Valid @RequestBody UpdateJobRequest request,
-            @RequestHeader("X-User-Id") Long userId
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader("X-User-Email") String email
     ) {
-        return ResponseEntity.ok(jobService.updateJob(id, request, userId));
+        return ResponseEntity.ok(jobService.updateJob(id, request, userId, email));
     }
 
     // DELETE JOB
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteJob(
             @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long userId
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader("X-User-Email") String email
     ) {
-        jobService.deleteJob(id, userId);
+        jobService.deleteJob(id, userId, email);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Job deleted successfully");
     }
 }

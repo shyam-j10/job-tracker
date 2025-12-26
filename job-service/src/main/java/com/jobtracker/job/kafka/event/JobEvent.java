@@ -7,13 +7,15 @@ public class JobEvent {
     private Long jobId;
     private Long userId;
     private String eventType;
+    private String userEmail;
     private String description;
     private LocalDateTime timestamp;
 
-    public JobEvent(Long jobId, Long userId, String eventType, String description) {
+    public JobEvent(Long jobId, Long userId, String eventType, String userEmail, String description) {
         this.jobId = jobId;
         this.userId = userId;
         this.eventType = eventType;
+        this.userEmail = userEmail;
         this.description = description;
         this.timestamp = LocalDateTime.now();
     }
@@ -36,5 +38,9 @@ public class JobEvent {
 
     public LocalDateTime getTimestamp() {
         return timestamp;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
     }
 }

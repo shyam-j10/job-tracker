@@ -20,7 +20,7 @@ public class JobEventProducer {
     }
 
     public void send(JobEvent event) {
-        log.info("Publishing event to Kafka: {}", event.getEventType());
+        log.info("Publishing event to Kafka: {}", event.getEventType(), event.getUserEmail());
         kafkaTemplate.send(TOPIC, event);
     }
 }

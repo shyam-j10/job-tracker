@@ -40,7 +40,7 @@ public class JobEventConsumer {
             );
                     
             emailService.sendJobNotification(
-                "jayashyam2020@gmail.com",
+                event.getUserEmail(),
                 subject,
                 body
             );

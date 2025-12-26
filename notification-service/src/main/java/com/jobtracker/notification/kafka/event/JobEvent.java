@@ -7,6 +7,7 @@ public class JobEvent {
     private Long jobId;
     private Long userId;
     private String eventType;
+    private String userEmail;
     private String description;
     private LocalDateTime timestamp;
 
@@ -32,5 +33,9 @@ public class JobEvent {
 
     public LocalDateTime getTimestamp() {
         return timestamp;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
     }
 }

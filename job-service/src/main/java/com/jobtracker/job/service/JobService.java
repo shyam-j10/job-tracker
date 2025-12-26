@@ -65,7 +65,7 @@ public class JobService {
         return response;
     }
 
-    public JobResponse createJob(CreateJobRequest request, Long userId) {
+    public JobResponse createJob(CreateJobRequest request, Long userId, String email) {
 
         JobEntry job = new JobEntry();
         job.setUserId(userId);
@@ -98,7 +98,8 @@ public class JobService {
                 saved.getId(),
                 userId,
                 "JOB_CREATED",
-                "Job created for " + saved.getCompanyName()
+                email,
+                "Job created for " + saved.getCompanyName() + " with role of " + saved.getJobTitle()
             )
         );
 
@@ -121,7 +122,7 @@ public class JobService {
         return mapToResponse(job);
     }
 
-    public JobResponse updateJob(Long jobId, UpdateJobRequest request, Long userId) {
+    public JobResponse updateJob(Long jobId, UpdateJobRequest request, Long userId, String email) {
 
         JobEntry job = jobEntryRepository
         .findByIdAndUserId(jobId, userId)
@@ -157,7 +158,8 @@ public class JobService {
                     job.getId(),
                     userId,
                     "JOB_STATUS_UPDATED",
-                    "Status changed to " + request.getApplicationStatus()
+                    email,
+                    "Status changed to " + job.getApplicationStatus() + "for" + job.getCompanyName() + " with role of " + job.getJobTitle()
                 )
         );
         }
@@ -182,7 +184,7 @@ public class JobService {
         return mapToResponse(job);
     }
 
-    public void deleteJob(Long jobId, Long userId) {
+    public void deleteJob(Long jobId, Long userId, String email) {
 
         JobEntry job = jobEntryRepository
                 .findByIdAndUserId(jobId, userId)
@@ -193,7 +195,8 @@ public class JobService {
                 job.getId(),
                 userId,
                 "JOB_DELETED",
-                "Job deleted"
+                email,
+                "Job deleted for " + job.getCompanyName() + " with role of " + job.getJobTitle()
             )
         );
 
