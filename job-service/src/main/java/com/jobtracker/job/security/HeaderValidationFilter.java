@@ -21,8 +21,17 @@ public class HeaderValidationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String path = httpRequest.getRequestURI();
+
+        if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs")) {
+            filterChain.doFilter(request, response);
+            return;
+        }   
+        
         System.out.println("Header Validaton Filter called");
         String userIdHeader = request.getHeader(USER_ID_HEADER);
+
 
         if (userIdHeader == null || userIdHeader.isBlank()) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
