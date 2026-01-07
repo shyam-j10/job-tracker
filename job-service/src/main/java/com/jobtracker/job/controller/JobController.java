@@ -3,6 +3,8 @@ package com.jobtracker.job.controller;
 import com.jobtracker.job.dto.request.CreateJobRequest;
 import com.jobtracker.job.dto.request.UpdateJobRequest;
 import com.jobtracker.job.dto.response.JobResponse;
+import com.jobtracker.job.dto.response.JobStatsResponse;
+import com.jobtracker.job.enums.ApplicationStatus;
 import com.jobtracker.job.service.JobService;
 
 import jakarta.validation.Valid;
@@ -34,12 +36,16 @@ public class JobController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // GET ALL JOBS
+    //GET JOB BY FILTERS
     @GetMapping
-    public ResponseEntity<List<JobResponse>> getAllJobs(
-            @RequestHeader("X-User-Id") Long userId
+    public List<JobResponse> getJobs(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestParam(required = false) ApplicationStatus status,
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String jobType,
+            @RequestParam(required = false) String q
     ) {
-        return ResponseEntity.ok(jobService.getAllJobs(userId));
+        return jobService.searchJobs(userId, status, company, jobType, q);
     }
 
     // GET JOB BY ID
@@ -49,6 +55,14 @@ public class JobController {
             @RequestHeader("X-User-Id") Long userId
     ) {
         return ResponseEntity.ok(jobService.getJobById(id, userId));
+    }
+
+    // GET DASHBOARD STATS
+    @GetMapping("/stats")
+    public JobStatsResponse getStats(
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        return jobService.getStats(userId);
     }
 
     // UPDATE JOB

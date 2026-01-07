@@ -4,6 +4,7 @@ import com.jobtracker.job.dto.request.CreateJobRequest;
 import com.jobtracker.job.dto.request.UpdateJobRequest;
 import com.jobtracker.job.dto.response.ContactResponse;
 import com.jobtracker.job.dto.response.JobResponse;
+import com.jobtracker.job.dto.response.JobStatsResponse;
 import com.jobtracker.job.entity.Contact;
 import com.jobtracker.job.entity.JobEntry;
 import com.jobtracker.job.enums.ApplicationStatus;
@@ -17,7 +18,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,12 +110,6 @@ public class JobService {
         return mapToResponse(saved);
     }
 
-    public List<JobResponse> getAllJobs(Long userId) {
-        return jobEntryRepository.findByUserId(userId)
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
 
     public JobResponse getJobById(Long jobId, Long userId) {
         JobEntry job = jobEntryRepository
@@ -120,6 +117,32 @@ public class JobService {
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
         return mapToResponse(job);
+    }
+
+    public List<JobResponse> searchJobs(Long userId, ApplicationStatus status, String company, String jobType,
+            String q) {
+        return jobEntryRepository
+            .searchJobs(userId, status, company, jobType, q)
+            .stream()
+            .map(this::mapToResponse)
+            .toList();
+    }
+
+    public JobStatsResponse getStats(Long userId) {
+
+        List<Object[]> rows = jobEntryRepository.countByStatus(userId);
+
+        Map<ApplicationStatus, Long> statusCount = new HashMap<>();
+        long total = 0;
+
+        for (Object[] row : rows) {
+            ApplicationStatus status = (ApplicationStatus) row[0];
+            Long count = (Long) row[1];
+            statusCount.put(status, count);
+            total += count;
+        }
+
+        return new JobStatsResponse(total, statusCount);
     }
 
     public JobResponse updateJob(Long jobId, UpdateJobRequest request, Long userId, String email) {
@@ -203,7 +226,5 @@ public class JobService {
 
         jobEntryRepository.delete(job);
     }
-
-
 
 }
